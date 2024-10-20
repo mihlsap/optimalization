@@ -55,7 +55,7 @@ double* expansion(matrix(*ff)(matrix, matrix, matrix), double x0, double d, doub
         X2.fit_fun(ff, ud1, ud2);
         while(true) {
             if (solution::f_calls > Nmax)
-                exit(-1);
+                return nullptr;
             i++;
             if (X1.y > X2.y)
                 break;
