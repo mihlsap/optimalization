@@ -63,8 +63,6 @@ double* expansion(matrix(*ff)(matrix, matrix, matrix), double x0, double d, doub
                 X0 = X1;
                 X1 = X2;
                 X2 = solution(x0 + pow(alpha, i) * d);
-                X0.fit_fun(ff, ud1, ud2);
-                X1.fit_fun(ff, ud1, ud2);
                 X2.fit_fun(ff, ud1, ud2);
                 i++;
             }
