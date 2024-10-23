@@ -77,8 +77,8 @@ void lab1() {
         for (double x0 : uniqueNums) {
 
             // Expansion
-            double d = 1.97, alpha = 3.48;
-            //alpha1 = 1.92, alpha2 = 3.48
+            double d = 4.12, alpha = 1.00043;
+            //alpha1 = 1.92, alpha2 = 3.48, alpha3 = 1.00043
             int Nmax = 1000;
             unique_ptr<double[]> p(expansion(ff1T, x0, d, alpha, Nmax));
 
