@@ -59,62 +59,85 @@ void lab0() {
 }
 
 void lab1() {
-    fstream csvFile;
+    try {
+        const string FILE_PATH = R"(C:\Users\Dell\Desktop\stuff\studia\semestr 5\Optymalizacja\project\data\data1\data1.csv)";
+        fstream csvFile;
 
-    const int numOfElements = 100;
-    double minVal = -5, maxVal = 10;
+        const int numOfElements = 100;
+        double minVal = -1, maxVal = 1;
+        set<double> uniqueNums;
 
-    set<double> uniqueNums;
+        default_random_engine randomEngine(random_device{}());
+        uniform_real_distribution<double> realDistribution(minVal, maxVal);
 
-    default_random_engine randomEngine(random_device{}());
-    uniform_real_distribution<double> realDistribution(minVal, maxVal);
+        while (uniqueNums.size() < numOfElements) {
+            uniqueNums.insert(realDistribution(randomEngine));
+        }
 
-    while (uniqueNums.size() < numOfElements)
-        uniqueNums.insert(realDistribution(randomEngine));
+        for (double x0 : uniqueNums) {
 
-    for (auto &uniqueNum: uniqueNums) {
-//        Expansion
-        double x0 = uniqueNum, d = 0.37, alpha = 1.024;
-        int Nmax = 1000;
-        double *p = expansion(ff1T, x0, d, alpha, Nmax, NAN, NAN);
+            // Expansion
+            double d = 0.75, alpha = 1.92;
+            int Nmax = 1000;
+            unique_ptr<double[]> p(expansion(ff1T, x0, d, alpha, Nmax));
 
-        csvFile.open(R"(C:\Users\Dell\Desktop\stuff\studia\semestr 5\Optymalizacja\project\data\data1\data1.csv)",
-                     ios::app);
-        csvFile << x0 << "," << p[0] << "," << p[1] << "," << solution::f_calls << ",";
-        csvFile.close();
+            if (!p)
+                continue;
 
-        solution::clear_calls();
+            try {
+                csvFile.open(FILE_PATH, ios::app);
+                if (!csvFile.is_open()) {
+                    throw runtime_error("Could not open file");
+                }
+                csvFile << x0 << "," << p[0] << "," << p[1] << "," << solution::f_calls << ",";
+                csvFile.close();
+            } catch (const exception& e) {
+                cout << "Error writing expansion results: " << e.what() << endl;
+                csvFile.close();
+                continue;
+            }
+            solution::clear_calls();
 
-//    Fibonacci
+            // Fibonacci
+            try {
+                solution Fibonacci = fib(ff1T, p[0], p[1], 0.0001);
+                csvFile.open(FILE_PATH, ios::app);
+                if (!csvFile.is_open()) {
+                    throw runtime_error("Could not open file");
+                }
+                csvFile << m2d(Fibonacci.x) << "," << m2d(Fibonacci.y) << "," << solution::f_calls << ",";
+                csvFile.close();
+            } catch (const exception& e) {
+                cout << "Error in Fibonacci: " << e.what() << endl;
+                csvFile.close();
+                continue;
+            }
+            solution::clear_calls();
 
-        solution Fibonacci = fib(ff1T, p[0], p[1], 1e-05, NAN, NAN);
+            // Lagrange
+            try {
+                solution Lagrange = lag(ff1T, p[0], p[1], 0.0001, 1e-09, Nmax);
 
-        csvFile.open(R"(C:\Users\Dell\Desktop\stuff\studia\semestr 5\Optymalizacja\project\data\data1\data1.csv)",
-                     ios::app);
-        csvFile << m2d(Fibonacci.x) << "," << m2d(Fibonacci.y) << "," << solution::f_calls << ",";
-        csvFile.close();
+                csvFile.open(FILE_PATH, ios::app);
+                if (!csvFile.is_open()) {
+                    throw runtime_error("Could not open file");
+                }
+                csvFile << m2d(Lagrange.x) << "," << m2d(Lagrange.y) << "," << solution::f_calls << "\n";
+                csvFile.close();
+            } catch (const exception& e) {
+                cout << "Error in Lagrange: " << e.what() << endl;
+                csvFile.close();
+                continue;
+            }
+            solution::clear_calls();
+        }
 
+        cout << "Processing completed successfully" << endl;
 
-        solution::clear_calls();
-
-//    Lagrange
-
-        solution Lagrange = lag(ff1T, p[0], p[1], 1e-05, 1e-09, 1000, NAN, NAN);
-
-        csvFile.open(R"(C:\Users\Dell\Desktop\stuff\studia\semestr 5\Optymalizacja\project\data\data1\data1.csv)",
-                     ios::app);
-        csvFile << m2d(Lagrange.x) << "," << m2d(Lagrange.y) << "," << solution::f_calls << "\n";
-        csvFile.close();
-        if (Lagrange.flag == -1)
-            cout << "Exit flag (Lagrange) [" << uniqueNum << "]: " << -1 << "\n";
-        else if (Lagrange.flag == -2)
-            cout << "Exit flag (Lagrange) [" << uniqueNum << "]: " << -2 << "\n";
-        else if (Lagrange.flag == -3)
-            cout << "Exit flag (Lagrange) [" << uniqueNum << "]: " << -3 << "\n";
-
-
-        solution::clear_calls();
-        delete[] p;
+    } catch (const exception& e) {
+        cout << "Fatal error in lab1: " << e.what() << endl;
+    } catch (...) {
+        cout << "Unknown error in lab1" << endl;
     }
     exit(0);
 }

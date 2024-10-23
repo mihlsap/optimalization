@@ -25,19 +25,22 @@ MC(matrix(*ff)(matrix, matrix, matrix), int N, matrix lb, matrix ub, double epsi
     }
 }
 
-double *expansion(matrix(*ff)(matrix, matrix, matrix), double x0, double d, double alpha, int Nmax, matrix ud1, matrix ud2) {
+double *
+expansion(matrix(*ff)(matrix, matrix, matrix), double x0, double d, double alpha, int Nmax, matrix ud1, matrix ud2) {
     try {
         auto *p = new double[2]{0, 0};
-        //Tu wpisz kod funkcji
-        unsigned int i = 0;
+        int i = 0;
+
         solution X0(x0), X1(x0 + d);
         X0.fit_fun(ff, ud1, ud2);
         X1.fit_fun(ff, ud1, ud2);
+
         if (X0.y == X1.y) {
             p[0] = m2d(X0.x);
             p[1] = m2d(X1.x);
             return p;
         }
+
         if (X1.y > X0.y) {
             d *= -1;
             X1.x = X0.x + d;
@@ -48,29 +51,34 @@ double *expansion(matrix(*ff)(matrix, matrix, matrix), double x0, double d, doub
                 return p;
             }
         }
-        solution X2(x0 + pow(alpha, i) * d);
-        X2.fit_fun(ff, ud1, ud2);
-        while (true) {
-            if (solution::f_calls > Nmax)
-                return nullptr;
-            i++;
-            if (X1.y > X2.y)
-                break;
-            else {
-                X0 = X1;
-                X1 = X2;
-                X2 = solution(x0 + pow(alpha, i) * d);
-                X2.fit_fun(ff, ud1, ud2);
-                i++;
+
+        solution X2;
+        do {
+            X2.x = X0.x + pow(alpha, i) * d;
+            X2.fit_fun(ff, ud1, ud2);
+
+            if (solution::f_calls > Nmax) {
+                p[0] = m2d(X0.x);
+                p[1] = m2d(X2.x);
+                return p;
             }
-        }
+
+            if (X2.y >= X1.y)
+                break;
+
+            X0 = X1;
+            X1 = X2;
+            i++;
+        } while (true);
+
         if (d > 0) {
             p[0] = m2d(X0.x);
             p[1] = m2d(X2.x);
-            return p;
+        } else {
+            p[0] = m2d(X2.x);
+            p[1] = m2d(X0.x);
         }
-        p[0] = m2d(X2.x);
-        p[1] = m2d(X0.x);
+
         return p;
     }
     catch (string ex_info) {
@@ -81,7 +89,6 @@ double *expansion(matrix(*ff)(matrix, matrix, matrix), double x0, double d, doub
 solution fib(matrix(*ff)(matrix, matrix, matrix), double a, double b, double epsilon, matrix ud1, matrix ud2) {
     try {
         solution Xopt;
-        //Tu wpisz kod funkcji
         unsigned int k = 1;
 
         vector<double> fibonacci;
@@ -126,55 +133,44 @@ solution fib(matrix(*ff)(matrix, matrix, matrix), double a, double b, double eps
 
 }
 
-solution lag(matrix(*ff)(matrix, matrix, matrix), double a, double b, double epsilon, double gamma, int Nmax, matrix ud1, matrix ud2) {
+solution
+lag(matrix(*ff)(matrix, matrix, matrix), double a, double b, double epsilon, double gamma, int Nmax, matrix ud1,
+    matrix ud2) {
     try {
         solution Xopt;
         Xopt.ud = b - a;
 
-        // Inicjalizacja trzech punktów
         solution A(a), B(b);
-        double c = (a + b) / 2;  // punkt środkowy
+        double c = (a + b) / 2;
         solution C(c);
 
-        // Obliczenie wartości funkcji w punktach
         A.fit_fun(ff, ud1, ud2);
         B.fit_fun(ff, ud1, ud2);
         C.fit_fun(ff, ud1, ud2);
 
-        double d_prev = INFINITY;  // poprzednia wartość d
+        double d_prev = INFINITY;
+        int iter = 0;
 
         while (true) {
-            // Obliczenie współczynników paraboli
-            double l = m2d(A.y * (pow(B.x(0), 2) - pow(C.x(0), 2)) +
-                           B.y * (pow(C.x(0), 2) - pow(A.x(0), 2)) +
-                           C.y * (pow(A.x(0), 2) - pow(B.x(0), 2)));
+            double l = m2d(A.y * (pow(B.x(0), 2) - pow(C.x(0), 2)) + B.y * (pow(C.x(0), 2) - pow(A.x(0), 2)) + C.y * (pow(A.x(0), 2) - pow(B.x(0), 2)));
+            double m = m2d(A.y * (m2d(B.x) - m2d(C.x)) + B.y * (m2d(C.x) - m2d(A.x)) + C.y * (m2d(A.x) - m2d(B.x)));
 
-            double m = m2d(A.y * (m2d(B.x) - m2d(C.x)) +
-                           B.y * (m2d(C.x) - m2d(A.x)) +
-                           C.y * (m2d(A.x) - m2d(B.x)));
-
-            // Sprawdzenie czy mianownik nie jest zbyt mały
-            if (abs(m) < epsilon) {
+            if (abs(m) <= epsilon) {
                 Xopt = C;
-                Xopt.flag = 0;
+                Xopt.flag = -1;
                 return Xopt;
             }
 
-            // Obliczenie minimum paraboli
-            double d = l / (2 * m);
+            double d = 0.5 * (l / m);
 
-            // Sprawdzenie czy d jest w przedziale [a,b]
-            if (d < a || d > b) {
-                Xopt = C;
-                Xopt.flag = 0;
+            if (d < min(m2d(A.x), m2d(B.x)) || d > max(m2d(A.x), m2d(B.x))) {
+                Xopt.flag = -2;
                 return Xopt;
             }
 
-            // Utworzenie nowego punktu i obliczenie wartości funkcji
             solution D(d);
             D.fit_fun(ff, ud1, ud2);
 
-            // Sprawdzenie warunków stopu
             if (solution::f_calls > Nmax) {
                 Xopt = D;
                 Xopt.flag = 0;
@@ -187,16 +183,15 @@ solution lag(matrix(*ff)(matrix, matrix, matrix), double a, double b, double eps
                 return Xopt;
             }
 
-            // Aktualizacja punktów
-            if (d < c) {
-                if (D.y < C.y) {
+            if (d < m2d(C.x)) {
+                if (m2d(D.y) < m2d(C.y)) {
                     B = C;
                     C = D;
                 } else {
                     A = D;
                 }
             } else {
-                if (D.y < C.y) {
+                if (m2d(D.y) < m2d(C.y)) {
                     A = C;
                     C = D;
                 } else {
@@ -204,25 +199,22 @@ solution lag(matrix(*ff)(matrix, matrix, matrix), double a, double b, double eps
                 }
             }
 
-            // Aktualizacja c
-            c = m2d(C.x);
-            d_prev = d;
+            double new_interval = abs(m2d(B.x) - m2d(A.x));
+            Xopt.ud.add_row(new_interval);
 
-            // Aktualizacja przedziału przeszukiwania
-            a = m2d(A.x);
-            b = m2d(B.x);
-
-            if (b - a < epsilon) {
+            if (new_interval < epsilon) {
                 Xopt = C;
                 Xopt.flag = 1;
                 return Xopt;
             }
 
-            Xopt.ud.add_row(b - a);
+            d_prev = d;
+            iter++;
+
+            solution::f_calls++;
         }
-    }
-    catch (string ex_info) {
-        throw ("solution lag(...):\n" + ex_info);
+    } catch (...) {
+        throw "Error in lag";
     }
 }
 
