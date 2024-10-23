@@ -60,11 +60,11 @@ void lab0() {
 
 void lab1() {
     try {
-        const string FILE_PATH = R"(C:\Users\Dell\Desktop\stuff\studia\semestr 5\Optymalizacja\project\data\data1\data1.csv)";
+        const string FILE_PATH = R"(C:\Users\Dell\Desktop\stuff\studia\semestr 5\Optymalizacja\project\data\data1\data3.csv)";
         fstream csvFile;
 
         const int numOfElements = 100;
-        double minVal = -1, maxVal = 1;
+        double minVal = -8, maxVal = 8;
         set<double> uniqueNums;
 
         default_random_engine randomEngine(random_device{}());
@@ -77,7 +77,8 @@ void lab1() {
         for (double x0 : uniqueNums) {
 
             // Expansion
-            double d = 0.75, alpha = 1.92;
+            double d = 1.97, alpha = 3.48;
+            //alpha1 = 1.92, alpha2 = 3.48
             int Nmax = 1000;
             unique_ptr<double[]> p(expansion(ff1T, x0, d, alpha, Nmax));
 
