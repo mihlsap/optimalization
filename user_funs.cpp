@@ -31,5 +31,6 @@ matrix df0(double t, matrix Y, matrix ud1, matrix ud2) {
 }
 
 matrix ff1T(matrix x, matrix ud1, matrix ud2) {
-    return -cos(0.1 * m2d(x)) * exp(-pow((0.1 * m2d(x) - 2 * M_PI), 2)) + 0.002 * pow(0.1 * m2d(x), 2);
+//    return -cos(0.1 * m2d(x)) * exp(-pow((0.1 * m2d(x) - 2 * M_PI), 2)) + 0.002 * pow(0.1 * m2d(x), 2);
+    return pow(x, 2);
 }

@@ -9,6 +9,7 @@
 #include <random>
 #include <chrono>
 #include <set>
+#include <memory>
 using namespace std;
 
 #define SEP_SYMBOL ','
