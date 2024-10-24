@@ -59,12 +59,12 @@ void lab0() {
 }
 
 void lab1() {
-    try {
-        const string FILE_PATH = R"(C:\Users\Dell\Desktop\stuff\studia\semestr 5\Optymalizacja\project\data\data1\data3.csv)";
+     try {
+        const string FILE_PATH = R"(C:\Users\Dell\Desktop\stuff\studia\semestr 5\Optymalizacja\project\data\data1\data5.csv)";
         fstream csvFile;
 
         const int numOfElements = 100;
-        double minVal = -8, maxVal = 8;
+        double minVal = -15, maxVal = 15;
         set<double> uniqueNums;
 
         default_random_engine randomEngine(random_device{}());
@@ -77,7 +77,7 @@ void lab1() {
         for (double x0 : uniqueNums) {
 
             // Expansion
-            double d = 4.12, alpha = 1.00043;
+            double d = 4.25, alpha = 1.00043;
             //alpha1 = 1.92, alpha2 = 3.48, alpha3 = 1.00043
             int Nmax = 1000;
             unique_ptr<double[]> p(expansion(ff1T, x0, d, alpha, Nmax));
@@ -118,12 +118,19 @@ void lab1() {
             // Lagrange
             try {
                 solution Lagrange = lag(ff1T, p[0], p[1], 0.0001, 1e-09, Nmax);
+                matrix userData = Lagrange.ud;
+//                int* uDSize = get_size(userData);
 
                 csvFile.open(FILE_PATH, ios::app);
                 if (!csvFile.is_open()) {
                     throw runtime_error("Could not open file");
                 }
-                csvFile << m2d(Lagrange.x) << "," << m2d(Lagrange.y) << "," << solution::f_calls << "\n";
+//                csvFile << "Lagrange:\n";
+                csvFile << userData << "\n";
+//                for (int i = 0; i < uDSize[0]; i++) {
+//                    csvFile << m2d(get_row(userData, i)) << ",";
+//                }
+//                csvFile << m2d(Lagrange.x) << "," << m2d(Lagrange.y) << "," << solution::f_calls << "\n";
                 csvFile.close();
             } catch (const exception& e) {
                 cout << "Error in Lagrange: " << e.what() << endl;

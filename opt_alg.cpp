@@ -86,6 +86,10 @@ expansion(matrix(*ff)(matrix, matrix, matrix), double x0, double d, double alpha
     }
 }
 
+//TODO
+// dodac obliczanie koncowego parametru b-a (dlugosc przedzialu) dla metody fibonacciego i lagrange'a
+// po kazdej iteracji
+
 solution fib(matrix(*ff)(matrix, matrix, matrix), double a, double b, double epsilon, matrix ud1, matrix ud2) {
     try {
         solution Xopt;
@@ -138,7 +142,6 @@ lag(matrix(*ff)(matrix, matrix, matrix), double a, double b, double epsilon, dou
     matrix ud2) {
     try {
         solution Xopt;
-        Xopt.ud = b - a;
 
         solution A(a), B(b);
         double c = (a + b) / 2;
@@ -201,6 +204,7 @@ lag(matrix(*ff)(matrix, matrix, matrix), double a, double b, double epsilon, dou
 
             double new_interval = abs(m2d(B.x) - m2d(A.x));
             Xopt.ud.add_row(new_interval);
+            cout << new_interval << ", ";
 
             if (new_interval < epsilon) {
                 Xopt = C;
