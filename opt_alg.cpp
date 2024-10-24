@@ -143,6 +143,8 @@ lag(matrix(*ff)(matrix, matrix, matrix), double a, double b, double epsilon, dou
     try {
         solution Xopt;
 
+        int i = 0;
+
         solution A(a), B(b);
         double c = (a + b) / 2;
         solution C(c);
@@ -202,9 +204,9 @@ lag(matrix(*ff)(matrix, matrix, matrix), double a, double b, double epsilon, dou
                 }
             }
 
-            double new_interval = abs(m2d(B.x) - m2d(A.x));
+            double new_interval = fabs(m2d(B.x) - m2d(A.x));
             Xopt.ud.add_row(new_interval);
-            cout << new_interval << ", ";
+            cout << "i: " << i << ", interval:" << new_interval << ", ";
 
             if (new_interval < epsilon) {
                 Xopt = C;
@@ -216,6 +218,7 @@ lag(matrix(*ff)(matrix, matrix, matrix), double a, double b, double epsilon, dou
             iter++;
 
             solution::f_calls++;
+            i++;
         }
     } catch (...) {
         throw "Error in lag";

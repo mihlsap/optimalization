@@ -126,7 +126,7 @@ void lab1() {
                     throw runtime_error("Could not open file");
                 }
 //                csvFile << "Lagrange:\n";
-                csvFile << userData << "\n";
+                csvFile << trans(userData) << "\n";
 //                for (int i = 0; i < uDSize[0]; i++) {
 //                    csvFile << m2d(get_row(userData, i)) << ",";
 //                }
