@@ -86,10 +86,6 @@ expansion(matrix(*ff)(matrix, matrix, matrix), double x0, double d, double alpha
     }
 }
 
-//TODO
-// dodac obliczanie koncowego parametru b-a (dlugosc przedzialu) dla metody fibonacciego i lagrange'a
-// po kazdej iteracji
-
 solution fib(matrix(*ff)(matrix, matrix, matrix), double a, double b, double epsilon, matrix ud1, matrix ud2) {
     try {
         solution Xopt;
@@ -143,8 +139,6 @@ lag(matrix(*ff)(matrix, matrix, matrix), double a, double b, double epsilon, dou
     try {
         solution Xopt;
 
-        int i = 0;
-
         solution A(a), B(b);
         double c = (a + b) / 2;
         solution C(c);
@@ -157,7 +151,8 @@ lag(matrix(*ff)(matrix, matrix, matrix), double a, double b, double epsilon, dou
         int iter = 0;
 
         while (true) {
-            double l = m2d(A.y * (pow(B.x(0), 2) - pow(C.x(0), 2)) + B.y * (pow(C.x(0), 2) - pow(A.x(0), 2)) + C.y * (pow(A.x(0), 2) - pow(B.x(0), 2)));
+            double l = m2d(A.y * (pow(B.x(0), 2) - pow(C.x(0), 2)) + B.y * (pow(C.x(0), 2) - pow(A.x(0), 2)) +
+                           C.y * (pow(A.x(0), 2) - pow(B.x(0), 2)));
             double m = m2d(A.y * (m2d(B.x) - m2d(C.x)) + B.y * (m2d(C.x) - m2d(A.x)) + C.y * (m2d(A.x) - m2d(B.x)));
 
             if (abs(m) <= epsilon) {
@@ -204,9 +199,8 @@ lag(matrix(*ff)(matrix, matrix, matrix), double a, double b, double epsilon, dou
                 }
             }
 
-            double new_interval = fabs(m2d(B.x) - m2d(A.x));
+            double new_interval = abs(m2d(B.x) - m2d(A.x));
             Xopt.ud.add_row(new_interval);
-            cout << "i: " << i << ", interval:" << new_interval << ", ";
 
             if (new_interval < epsilon) {
                 Xopt = C;
@@ -218,7 +212,6 @@ lag(matrix(*ff)(matrix, matrix, matrix), double a, double b, double epsilon, dou
             iter++;
 
             solution::f_calls++;
-            i++;
         }
     } catch (...) {
         throw "Error in lag";

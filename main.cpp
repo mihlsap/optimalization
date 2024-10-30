@@ -59,10 +59,12 @@ void lab0() {
 }
 
 void lab1() {
-     try {
-        const string FILE_PATH = R"(C:\Users\Dell\Desktop\stuff\studia\semestr 5\Optymalizacja\project\data\data1\data5.csv)";
-        fstream csvFile;
+    try {
 
+        //OPTYMALIZACJE
+
+        string FILE_PATH = R"(C:\Users\Dell\Desktop\stuff\studia\semestr 5\Optymalizacja\project\data\data1\Optimalization.csv)";
+        fstream csvFile;
         const int numOfElements = 100;
         double minVal = -15, maxVal = 15;
         set<double> uniqueNums;
@@ -118,20 +120,15 @@ void lab1() {
             // Lagrange
             try {
                 solution Lagrange = lag(ff1T, p[0], p[1], 0.0001, 1e-09, Nmax);
-                matrix userData = Lagrange.ud;
-//                int* uDSize = get_size(userData);
 
                 csvFile.open(FILE_PATH, ios::app);
                 if (!csvFile.is_open()) {
                     throw runtime_error("Could not open file");
                 }
-//                csvFile << "Lagrange:\n";
-                csvFile << trans(userData) << "\n";
-//                for (int i = 0; i < uDSize[0]; i++) {
-//                    csvFile << m2d(get_row(userData, i)) << ",";
-//                }
-//                csvFile << m2d(Lagrange.x) << "," << m2d(Lagrange.y) << "," << solution::f_calls << "\n";
+
+                csvFile << m2d(Lagrange.x) << "," << m2d(Lagrange.y) << "," << solution::f_calls << "\n";
                 csvFile.close();
+
             } catch (const exception& e) {
                 cout << "Error in Lagrange: " << e.what() << endl;
                 csvFile.close();
@@ -140,9 +137,58 @@ void lab1() {
             solution::clear_calls();
         }
 
-        cout << "Processing completed successfully" << endl;
+        //SYMULACJA
 
-    } catch (const exception& e) {
+        double DA0 = 0.001, d = 0.001, alpha = 2.257, epsilon = 1e-10, gamma = 1e-10;
+        int Nmax = 10000;
+
+        double *range = expansion(ff1R, DA0, d, alpha, Nmax);
+        solution::clear_calls();
+
+        solution FibonacciSolution = fib(ff1R, range[0], range[1], epsilon);
+        cout << "Optimal DA value for Fibonacci's method: " << FibonacciSolution.x << "\n";
+        cout << "Value of result function: " << FibonacciSolution.y << "\n";
+        cout << "Number of calls of result function: " << solution::f_calls << "\n\n";
+        solution::clear_calls();
+
+        solution LagrangeSolution = lag(ff1R, range[0], range[1], epsilon, gamma, Nmax);
+        cout << "Optimal DA value for Lagrange's method: " << LagrangeSolution.x << "\n";
+        cout << "Value of result function: " << LagrangeSolution.y << "\n";
+        cout << "Number of calls of result function: " << solution::f_calls << "\n";
+        solution::clear_calls();
+
+        double Pa = 0.5, Va0 = 5, Vb0 = 1, Tb0 = 20, t_0 = 0, t_step = 1, t_end = 2000;
+        matrix Y0 = matrix(3, 1, Va0);
+        Y0(1) = Vb0;
+        Y0(2) = Tb0;
+
+        double Da = m2d(FibonacciSolution.x);
+        matrix *FibonacciSimulation = solve_ode(df1R, t_0, t_step, t_end, Y0, Da, Pa);
+
+        FILE_PATH = R"(C:\Users\Dell\Desktop\stuff\studia\semestr 5\Optymalizacja\project\data\data1\FibonacciSimulation.csv)";
+        csvFile.open(FILE_PATH, ios::app);
+
+        csvFile << FibonacciSimulation[1] << "\n";
+        csvFile.close();
+
+        solution::clear_calls();
+
+        Da = m2d(LagrangeSolution.x);
+        matrix *LagrangeSimulation = solve_ode(df1R, t_0, t_step, t_end, Y0, Da, Pa);
+
+        FILE_PATH = R"(C:\Users\Dell\Desktop\stuff\studia\semestr 5\Optymalizacja\project\data\data1\LagrangeSimulation.csv)";
+        csvFile.open(FILE_PATH, ios::app);
+
+        csvFile << LagrangeSimulation[1] << "\n";
+        csvFile.close();
+
+        solution::clear_calls();
+
+//        delete[] range;
+//        delete FibonacciSimulation;
+//        delete LagrangeSimulation;
+
+    } catch (const exception &e) {
         cout << "Fatal error in lab1: " << e.what() << endl;
     } catch (...) {
         cout << "Unknown error in lab1" << endl;
