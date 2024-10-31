@@ -122,7 +122,6 @@ solution fib(matrix(*ff)(matrix, matrix, matrix), double a, double b, double eps
             D = solution(d);
             D.fit_fun(ff, ud1, ud2);
         }
-
         Xopt = solution(c);
         Xopt.fit_fun(ff, ud1, ud2);
         return Xopt;
@@ -210,8 +209,6 @@ lag(matrix(*ff)(matrix, matrix, matrix), double a, double b, double epsilon, dou
 
             d_prev = d;
             iter++;
-
-            solution::f_calls++;
         }
     } catch (...) {
         throw "Error in lag";

@@ -31,7 +31,7 @@ matrix df0(double t, matrix Y, matrix ud1, matrix ud2) {
 }
 
 matrix ff1T(matrix x, matrix ud1, matrix ud2) {
-    return -cos(0.1 * m2d(x)) * exp(-pow((0.1 * m2d(x) - 2 * M_PI), 2)) + 0.002 * pow(0.1 * m2d(x), 2);
+    return {-cos(0.1 * m2d(x)) * exp(-pow((0.1 * m2d(x) - 2 * M_PI), 2)) + 0.002 * pow(0.1 * m2d(x), 2)};
 }
 
 matrix ff1R(matrix x, matrix ud1, matrix ud2) {
@@ -51,7 +51,7 @@ matrix ff1R(matrix x, matrix ud1, matrix ud2) {
             Tmax = Y[1](i, 2);
         }
     }
-    delete Y;
+    delete[] Y;
 
     return {fabs(Tmax - 50.0)};
 }
@@ -62,8 +62,17 @@ matrix df1R(double t, matrix Y, matrix ud1, matrix ud2) {
     double F_in = 0.01, T_in = 20, TA = 90.0;
     double DA = m2d(ud1(0));
 
-    double FA_out = Y(0) > 0 ? a * b * DA * sqrt(2 * g * Y(0) / PA) : 0;
-    double FB_out = Y(1) > 0 ? a * b * DB * sqrt(2 * g * Y(1) / PB) : 0;
+    double FA_out, FB_out;
+
+    if (Y(0) > 0)
+        FA_out = a * b * DA * sqrt(2 * g * Y(0) / PA);
+    else
+        FA_out = 0;
+
+    if (Y(1) > 0)
+        FB_out = a * b * DB * sqrt(2 * g * Y(1) / PB);
+    else
+        FB_out = 0;
 
     derivatives(0) = -FA_out;
     derivatives(1) = FA_out + F_in - FB_out;
